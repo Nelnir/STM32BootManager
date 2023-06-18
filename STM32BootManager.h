@@ -132,10 +132,10 @@ private:
 #ifdef STM32_G0
 STM32BootManager::BootOperations* G0_Operations()
 {
-	static STM32BootManager::BootOperations op;
-	op.unlock = [](){
-		HAL_FLASH_Unlock();
-	};
+    static STM32BootManager::BootOperations op;
+    op.unlock = [](){
+	HAL_FLASH_Unlock();
+    };
 
     op.lock = [](){
     	HAL_FLASH_Lock();
@@ -143,43 +143,43 @@ STM32BootManager::BootOperations* G0_Operations()
 
     op.erase_app = [](){
     	FLASH_EraseInitTypeDef erase;
-		erase.TypeErase = FLASH_TYPEERASE_PAGES;
-		erase.Page = (END_ADDRESS - START_ADDRESS) / PAGE_SIZE;
-		erase.NbPages = FLASH_PAGE_NB - erase.Page;
-		erase.Banks = FLASH_BANK_1;
-		uint32_t t;
-		auto status = HAL_FLASHEx_Erase(&erase, &t);
-		return status == HAL_OK;
+	erase.TypeErase = FLASH_TYPEERASE_PAGES;
+	erase.Page = (END_ADDRESS - START_ADDRESS) / PAGE_SIZE;
+	erase.NbPages = FLASH_PAGE_NB - erase.Page;
+	erase.Banks = FLASH_BANK_1;
+	uint32_t t;
+	auto status = HAL_FLASHEx_Erase(&erase, &t);
+	return status == HAL_OK;
     };
 
     op.deinit_peripherals = [](){
     	// some deinits
-	    HAL_DeInit();
+	HAL_DeInit();
     };
 
     op.deinit_systick = [](){
     	SysTick->CTRL = 0;
-		SysTick->LOAD = 0;
-		SysTick->VAL = 0;
-		SCB->VTOR = START_ADDRESS;
-		__set_MSP(*(__IO uint32_t*)START_ADDRESS);
+	SysTick->LOAD = 0;
+	SysTick->VAL = 0;
+	SCB->VTOR = START_ADDRESS;
+	__set_MSP(*(__IO uint32_t*)START_ADDRESS);
     };
 
-	 op.write = [](uint32_t address, uint8_t* data, size_t size){
-		 for (uint32_t i = 0; i < size;)
-		 {
-			if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, address, *((uint64_t*)data)) == HAL_OK){
-				if (*(uint8_t*)address != *data){
-					return false;
-				}
-				address += 8;
-				data += 8;
-				i += 8;
-			 } else return false;
-		  }
-		  return true;
-	  };
-	 return &op;
+    op.write = [](uint32_t address, uint8_t* data, size_t size){
+	for (uint32_t i = 0; i < size;)
+	{
+		if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, address, *((uint64_t*)data)) == HAL_OK){
+			if (*(uint8_t*)address != *data){
+				return false;
+			}
+			address += 8;
+			data += 8;
+			i += 8;
+		} else return false;
+	}
+    	return true;
+    };
+    return &op;
 }
 #endif
 
