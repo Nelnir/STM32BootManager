@@ -30,7 +30,7 @@ public:
 
 	STM32BootManager(BootOperations* operations = nullptr) :
 	m_operations(operations),
-	m_was_erased(true),
+	m_was_erased(false),
 	m_write_pointer(START_ADDRESS)
 	{
 
